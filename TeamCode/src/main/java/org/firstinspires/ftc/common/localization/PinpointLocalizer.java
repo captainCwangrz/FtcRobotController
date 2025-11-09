@@ -10,10 +10,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 
+/**
+ * Localizer backed by the goBILDA Pinpoint driver returning mm & rad values.
+ */
 public class PinpointLocalizer implements Localizer
 {
     private final GoBildaPinpointDriver pinpoint;
-    private final DistanceUnit unit;
+    private final DistanceUnit distanceUnit;
     private Pose2d pose = new Pose2d(0.0, 0.0, 0.0);
     private ChassisSpeeds velRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
     private ChassisSpeeds accRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
@@ -23,7 +26,7 @@ public class PinpointLocalizer implements Localizer
     /**
      * @param hw           HardwareMap
      * @param deviceName   Config name
-     * @param unit         Unit for distances and velocities
+     * @param distanceUnit Distance/velocity unit provided by the driver (use mm for common code)
      * @param podType      goBILDA pod type
      * @param xOffsetMm    X pod offset (mm)
      * @param yOffsetMm    Y pod offset (mm)
@@ -34,7 +37,7 @@ public class PinpointLocalizer implements Localizer
     public PinpointLocalizer(
             HardwareMap hw,
             String deviceName,
-            DistanceUnit unit,
+            DistanceUnit distanceUnit,
             GoBildaPinpointDriver.GoBildaOdometryPods podType,
             double xOffsetMm,
             double yOffsetMm,
@@ -43,7 +46,7 @@ public class PinpointLocalizer implements Localizer
             boolean resetOnInit
     )
     {
-        this.unit = unit;
+        this.distanceUnit = distanceUnit;
         this.pinpoint = hw.get(GoBildaPinpointDriver.class, deviceName);
 
         pinpoint.setEncoderResolution(podType);
@@ -63,14 +66,14 @@ public class PinpointLocalizer implements Localizer
 
         // --- Pose ---
         Pose2D p = pinpoint.getPosition();
-        double x = p.getX(unit);
-        double y = p.getY(unit);
+        double x = DistanceUnit.MM.fromUnit(distanceUnit, p.getX(distanceUnit));
+        double y = DistanceUnit.MM.fromUnit(distanceUnit, p.getY(distanceUnit));
         double heading = p.getHeading(AngleUnit.RADIANS);
         pose = new Pose2d(x, y, heading);
 
         // --- Velocity  ---
-        double vx = pinpoint.getVelX(unit);
-        double vy = pinpoint.getVelY(unit);
+        double vx = DistanceUnit.MM.fromUnit(distanceUnit, pinpoint.getVelX(distanceUnit));
+        double vy = DistanceUnit.MM.fromUnit(distanceUnit, pinpoint.getVelY(distanceUnit));
         double omega = pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
 
         ChassisSpeeds newVel = new ChassisSpeeds(vx, vy, omega);
@@ -104,9 +107,9 @@ public class PinpointLocalizer implements Localizer
         if (newPose == null) return;
 
         Pose2D pinPose = new Pose2D(
-                unit,
-                newPose.x,
-                newPose.y,
+                distanceUnit,
+                distanceUnit.fromUnit(DistanceUnit.MM, newPose.x),
+                distanceUnit.fromUnit(DistanceUnit.MM, newPose.y),
                 AngleUnit.RADIANS,
                 newPose.heading
         );

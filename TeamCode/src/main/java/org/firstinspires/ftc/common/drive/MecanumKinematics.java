@@ -6,14 +6,13 @@ package org.firstinspires.ftc.common.drive;
  * Assumptions:
  *  - Coordinate convention from common.geometry.CoordinateConvention:
  *      +x: forward, +y: left, omega: CCW+.
- *  - Wheel layout is rectangular:
- *      front-left, front-right, back-left, back-right.
- *  - wheelBase: distance between front and back wheel centers (meters).
- *  - trackWidth: distance between left and right wheel centers (meters).
+ *  - Wheel layout is rectangular using wheel order (fl, fr, bl, br).
+ *  - wheelBaseMm: distance between front and back wheel centers (mm).
+ *  - trackWidthMm: distance between left and right wheel centers (mm).
  *
  * This class converts between:
  *  - ChassisSpeeds (vx, vy, omega) in ROBOT frame
- *  - WheelSpeeds (fl, fr, bl, br) linear speeds (m/s).
+ *  - WheelSpeeds (fl, fr, bl, br) linear speeds (mm/s).
  */
 public class MecanumKinematics
 {
@@ -24,22 +23,22 @@ public class MecanumKinematics
     private final double k;
 
     /**
-     * @param wheelBase  distance between front and back wheel centers (meters)
-     * @param trackWidth distance between left and right wheel centers (meters)
+     * @param wheelBaseMm  distance between front and back wheel centers (mm)
+     * @param trackWidthMm distance between left and right wheel centers (mm)
      */
-    public MecanumKinematics(double wheelBase, double trackWidth)
+    public MecanumKinematics(double wheelBaseMm, double trackWidthMm)
     {
-        this.halfWheelBase = wheelBase / 2.0;
-        this.halfTrackWidth = trackWidth / 2.0;
+        this.halfWheelBase = wheelBaseMm / 2.0;
+        this.halfTrackWidth = trackWidthMm / 2.0;
         this.k = halfWheelBase + halfTrackWidth;
     }
 
     /**
      * Forward kinematics:
-     * Given wheel linear speeds (m/s), compute chassis velocities in ROBOT frame.
+     * Given wheel linear speeds (mm/s), compute chassis velocities in ROBOT frame.
      *
-     * @param wheelSpeeds wheel speeds (fl, fr, bl, br), m/s
-     * @return chassis speeds (vx, vy, omega), vx/vy in m/s, omega in rad/s
+     * @param wheelSpeeds wheel speeds (fl, fr, bl, br), mm/s
+     * @return chassis speeds (vx, vy, omega), vx/vy in mm/s, omega in rad/s
      */
     public ChassisSpeeds toChassisSpeeds(WheelSpeeds wheelSpeeds)
     {
@@ -60,7 +59,7 @@ public class MecanumKinematics
      * Given desired chassis velocities in ROBOT frame, compute wheel linear speeds.
      *
      * @param speeds chassis speeds in ROBOT frame (vx, vy, omega)
-     * @return wheel linear speeds (fl, fr, bl, br), m/s
+     * @return wheel linear speeds (fl, fr, bl, br), mm/s
      */
     public WheelSpeeds toWheelSpeeds(ChassisSpeeds speeds)
     {

@@ -17,8 +17,8 @@ public class Team28770TeleOp extends OpMode
     private MecanumDrive drive;
     private Localizer localizer;
 
-    // TeleOp max speeds (use real values after characterization)
-    private static final double TELEOP_MAX_VEL = Team28770Constants.MAX_WHEEL_MPS * 0.8;
+    // TeleOp max speeds in mm/s (use real values after characterization)
+    private static final double TELEOP_MAX_VEL_MM_PER_SEC = Team28770Constants.MAX_WHEEL_MM_PER_SEC * 0.8;
     private static final double TELEOP_MAX_ANG_VEL = Math.PI * 2.0; // rad/s
 
     @Override
@@ -28,8 +28,8 @@ public class Team28770TeleOp extends OpMode
         Team28770MecanumDriveIO io = new Team28770MecanumDriveIO(hardwareMap);
         // Common kinematics
         MecanumKinematics kinematics = new MecanumKinematics(
-                Team28770Constants.WHEEL_BASE,
-                Team28770Constants.TRACK_WIDTH
+                Team28770Constants.WHEEL_BASE_MM,
+                Team28770Constants.TRACK_WIDTH_MM
         );
         drive = new MecanumDrive(kinematics, io);
         localizer = new PinpointLocalizer(hardwareMap, Team28770Constants.PINPOINT_NAME, Team28770Constants.PINPOINT_DIST_UNIT, Team28770Constants.PINPOINT_POD_TYPE, Team28770Constants.PINPOINT_X_OFFSET, Team28770Constants.PINPOINT_Y_OFFSET, Team28770Constants.PINPOINT_X_DIR, Team28770Constants.PINPOINT_Y_DIR, true);
@@ -55,16 +55,16 @@ public class Team28770TeleOp extends OpMode
         // Robot-centric mapping:
         double forward = -ly;
         double strafeRight = lx;
-        double vx = forward * TELEOP_MAX_VEL;
-        double vy = -strafeRight * TELEOP_MAX_VEL;
+        double vx = forward * TELEOP_MAX_VEL_MM_PER_SEC;
+        double vy = -strafeRight * TELEOP_MAX_VEL_MM_PER_SEC;
         double turn = -rx;
         double omega = turn * TELEOP_MAX_ANG_VEL;
 
         drive.driveRobotRelative(new ChassisSpeeds(vx, vy, omega));
 
-        telemetry.addData("vx", vx);
-        telemetry.addData("vy", vy);
-        telemetry.addData("omega", omega);
+        telemetry.addData("vx (mm/s)", vx);
+        telemetry.addData("vy (mm/s)", vy);
+        telemetry.addData("omega (rad/s)", omega);
         telemetry.addData("pose", localizer.getPose());
         telemetry.update();
     }

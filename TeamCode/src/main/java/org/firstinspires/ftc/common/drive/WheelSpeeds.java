@@ -4,7 +4,7 @@ package org.firstinspires.ftc.common.drive;
  * Linear speeds of a 4-mecanum wheel drivetrain.
  *
  * Units:
- *  - All fields are linear wheel speeds along the driving direction (m/s).
+ *  - All fields are linear wheel speeds along the driving direction (mm/s).
  *
  * Wheel order convention:
  *  - fl: front-left

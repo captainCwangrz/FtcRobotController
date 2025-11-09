@@ -9,7 +9,7 @@ import org.firstinspires.ftc.team28770_SYSNG.Team28770Constants;
 /**
  * Team 28770 implementation of DriveIO for a 4-mecanum drivetrain.
  *
- * - Converts desired wheel speeds (m/s) from common layer
+ * - Converts desired wheel speeds (mm/s) from common layer
  *   into encoder ticks/s for REV DcMotorEx.
  */
 public class Team28770MecanumDriveIO implements DriveIO
@@ -38,37 +38,37 @@ public class Team28770MecanumDriveIO implements DriveIO
     @Override
     public void setWheelSpeeds(WheelSpeeds speeds)
     {
-        fl.setVelocity(mpsToTicksPerSec(speeds.fl));
-        fr.setVelocity(mpsToTicksPerSec(speeds.fr));
-        bl.setVelocity(mpsToTicksPerSec(speeds.bl));
-        br.setVelocity(mpsToTicksPerSec(speeds.br));
+        fl.setVelocity(mmPerSecToTicksPerSec(speeds.fl));
+        fr.setVelocity(mmPerSecToTicksPerSec(speeds.fr));
+        bl.setVelocity(mmPerSecToTicksPerSec(speeds.bl));
+        br.setVelocity(mmPerSecToTicksPerSec(speeds.br));
     }
 
     @Override
-    public WheelSpeeds getWheelSpeeds()
+    public WheelSpeeds getWheelVelocities()
     {
-        // If encoders valid: convert ticks/s back to m/s
+        // If encoders valid: convert ticks/s back to mm/s
         return new WheelSpeeds(
-                ticksPerSecToMps(fl.getVelocity()),
-                ticksPerSecToMps(fr.getVelocity()),
-                ticksPerSecToMps(bl.getVelocity()),
-                ticksPerSecToMps(br.getVelocity())
+                ticksPerSecToMmPerSec(fl.getVelocity()),
+                ticksPerSecToMmPerSec(fr.getVelocity()),
+                ticksPerSecToMmPerSec(bl.getVelocity()),
+                ticksPerSecToMmPerSec(br.getVelocity())
         );
     }
 
     // --- Helpers ---
 
-    private static double mpsToTicksPerSec(double mps)
+    private static double mmPerSecToTicksPerSec(double mmPerSec)
     {
-        double revPerSec = mps / Team28770Constants.WHEEL_CIRCUMFERENCE;
+        double revPerSec = mmPerSec / Team28770Constants.WHEEL_CIRCUMFERENCE_MM;
         double motorRevPerSec = revPerSec / Team28770Constants.GEAR_RATIO;
         return motorRevPerSec * Team28770Constants.TICKS_PER_REV;
     }
 
-    private static double ticksPerSecToMps(double tps)
+    private static double ticksPerSecToMmPerSec(double ticksPerSec)
     {
-        double motorRevPerSec = tps / Team28770Constants.TICKS_PER_REV;
+        double motorRevPerSec = ticksPerSec / Team28770Constants.TICKS_PER_REV;
         double wheelRevPerSec = motorRevPerSec * Team28770Constants.GEAR_RATIO;
-        return wheelRevPerSec * Team28770Constants.WHEEL_CIRCUMFERENCE;
+        return wheelRevPerSec * Team28770Constants.WHEEL_CIRCUMFERENCE_MM;
     }
 }
