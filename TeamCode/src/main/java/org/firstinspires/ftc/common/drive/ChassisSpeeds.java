@@ -4,16 +4,16 @@ package org.firstinspires.ftc.common.drive;
  * Chassis velocities expressed in the ROBOT frame.
  *
  * Units:
- *  - vx: m/s, +x is forward.
- *  - vy: m/s, +y is left.
+ *  - vx: mm/s, +x is forward.
+ *  - vy: mm/s, +y is left.
  *  - omega: rad/s, CCW positive.
  *
  * This is the only shape of "drive command" that the kinematics layer accepts.
  */
 public class ChassisSpeeds
 {
-    public final double vx; // m/s, forward
-    public final double vy; // m/s, left
+    public final double vx; // mm/s, forward
+    public final double vy; // mm/s, left
     public final double omega; // rad/s, CCW+
 
     public ChassisSpeeds(double vx, double vy, double omega)

@@ -2,8 +2,8 @@ package org.firstinspires.ftc.common.geometry;
 
 public class Pose2d
 {
-    public final double x; // m
-    public final double y; // m
+    public final double x; // mm in field frame
+    public final double y; // mm in field frame
     public final double heading; // radians, CCW+, wrapped
 
     public Pose2d(double x, double y, double heading)

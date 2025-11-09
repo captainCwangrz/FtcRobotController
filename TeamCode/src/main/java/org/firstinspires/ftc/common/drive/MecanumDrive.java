@@ -2,9 +2,9 @@ package org.firstinspires.ftc.common.drive;
 
 /**
  * High-level mecanum drive wrapper:
- *  - Accepts chassis speeds in ROBOT frame (ChassisSpeeds).
+ *  - Accepts chassis speeds in ROBOT frame (ChassisSpeeds, mm/s & rad/s).
  *  - Uses kinematics to compute wheel speeds.
- *  - Delegates to DriveIO for actual hardware commands.
+ *  - Delegates to DriveIO for actual hardware commands (mm/s wheel targets).
  *
  * This is what TeleOp / Auto should talk to.
  */
@@ -24,7 +24,7 @@ public class MecanumDrive
     }
 
     /**
-     * Drive with chassis speeds in ROBOT frame.
+     * Drive with chassis speeds in ROBOT frame (mm/s, rad/s).
      *
      * TeleOp / Auto should compute ChassisSpeeds in ROBOT frame
      * (or convert from field frame before calling this).
@@ -44,10 +44,10 @@ public class MecanumDrive
     }
 
     /**
-     * Expose measured wheel speeds (if DriveIO supports it).
+     * Expose measured wheel speeds in mm/s (if DriveIO supports it).
      */
     public WheelSpeeds getMeasuredWheelSpeeds()
     {
-        return io.getWheelSpeeds();
+        return io.getWheelVelocities();
     }
 }
