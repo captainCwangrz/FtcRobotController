@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.common.geometry;
 
-import java.util.Vector;
-
 public class Vector2d
 {
     public final double x;
@@ -57,6 +55,6 @@ public class Vector2d
     @Override
     public String toString()
     {
-        return String.format("Vector2d(%.4f, %。4f)", x, y);
+        return String.format("Vector2d(%.4f, %.4f)", x, y);
     }
 }
