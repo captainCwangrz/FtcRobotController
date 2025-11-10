@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.common.drive;
 
 /**
- * Chassis velocities expressed in the ROBOT frame.
+ * Immutable chassis velocity container expressed in the <strong>robot frame</strong>.
  *
- * Units:
- *  - vx: mm/s, +x is forward.
- *  - vy: mm/s, +y is left.
- *  - omega: rad/s, CCW positive.
+ * <p>Units:
+ * <ul>
+ *     <li>{@code vx}: mm/s, +x forward</li>
+ *     <li>{@code vy}: mm/s, +y left</li>
+ *     <li>{@code omega}: rad/s, CCW+</li>
+ * </ul>
  *
- * This is the only shape of "drive command" that the kinematics layer accepts.
+ * <p>This is the canonical "drive command" shape understood by the kinematics layer.</p>
  */
-public class ChassisSpeeds
+public final class ChassisSpeeds
 {
     public final double vx; // mm/s, forward
     public final double vy; // mm/s, left
