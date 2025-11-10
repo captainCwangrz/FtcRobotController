@@ -1,5 +1,15 @@
 package org.firstinspires.ftc.common.geometry;
 
+/**
+ * A 2D pose expressed in the <b>field frame</b> unless otherwise noted.
+ *
+ * <p>Units:</p>
+ * <ul>
+ *     <li>{@code x}: millimetres, +x forward from the origin.</li>
+ *     <li>{@code y}: millimetres, +y to the left from the origin.</li>
+ *     <li>{@code heading}: radians, counter-clockwise positive.</li>
+ * </ul>
+ */
 public class Pose2d
 {
     public final double x; // mm in field frame
@@ -10,7 +20,7 @@ public class Pose2d
     {
         this.x = x;
         this.y = y;
-        this.heading = heading;
+        this.heading = MathUtil.wrapAngle(heading);
     }
 
     public Vector2d vec()
