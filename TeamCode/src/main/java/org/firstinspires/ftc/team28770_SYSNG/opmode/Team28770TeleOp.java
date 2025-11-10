@@ -3,9 +3,14 @@ package org.firstinspires.ftc.team28770_SYSNG.opmode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.common.control.HeadingController;
+import org.firstinspires.ftc.common.control.SlewRateLimiter;
+import org.firstinspires.ftc.common.control.TeleOpConfig;
+import org.firstinspires.ftc.common.control.TeleOpDriveHelper;
 import org.firstinspires.ftc.common.drive.ChassisSpeeds;
 import org.firstinspires.ftc.common.drive.MecanumDrive;
 import org.firstinspires.ftc.common.drive.MecanumKinematics;
+import org.firstinspires.ftc.common.geometry.Pose2d;
 import org.firstinspires.ftc.common.localization.Localizer;
 import org.firstinspires.ftc.common.localization.PinpointLocalizer;
 import org.firstinspires.ftc.team28770_SYSNG.Team28770Constants;
@@ -16,10 +21,15 @@ public class Team28770TeleOp extends OpMode
 {
     private MecanumDrive drive;
     private Localizer localizer;
+    private TeleOpConfig teleOpConfig;
+    private HeadingController headingController;
+    private SlewRateLimiter vxLimiter;
+    private SlewRateLimiter vyLimiter;
+    private SlewRateLimiter omegaLimiter;
 
-    // TeleOp max speeds in mm/s (use real values after characterization)
-    private static final double TELEOP_MAX_VEL_MM_PER_SEC = Team28770Constants.MAX_WHEEL_MM_PER_SEC * 0.8;
-    private static final double TELEOP_MAX_ANG_VEL = Math.PI * 2.0; // rad/s
+    private boolean headingHoldActive;
+    private double headingHoldTarget;
+    private double lastLoopTime;
 
     @Override
     public void init()
@@ -31,8 +41,54 @@ public class Team28770TeleOp extends OpMode
                 Team28770Constants.WHEEL_BASE_MM,
                 Team28770Constants.TRACK_WIDTH_MM
         );
-        drive = new MecanumDrive(kinematics, io);
-        localizer = new PinpointLocalizer(hardwareMap, Team28770Constants.PINPOINT_NAME, Team28770Constants.PINPOINT_DIST_UNIT, Team28770Constants.PINPOINT_POD_TYPE, Team28770Constants.PINPOINT_X_OFFSET, Team28770Constants.PINPOINT_Y_OFFSET, Team28770Constants.PINPOINT_X_DIR, Team28770Constants.PINPOINT_Y_DIR, true);
+        drive = new MecanumDrive(kinematics, io, Team28770Constants.MAX_WHEEL_SPEED_MM_PER_S);
+        localizer = new PinpointLocalizer(
+                hardwareMap,
+                Team28770Constants.PINPOINT_NAME,
+                Team28770Constants.PINPOINT_DIST_UNIT,
+                Team28770Constants.PINPOINT_POD_TYPE,
+                Team28770Constants.PINPOINT_X_OFFSET,
+                Team28770Constants.PINPOINT_Y_OFFSET,
+                Team28770Constants.PINPOINT_X_DIR,
+                Team28770Constants.PINPOINT_Y_DIR,
+                true
+        );
+
+        teleOpConfig = new TeleOpConfig(
+                Team28770Constants.TELEOP_DEADBAND,
+                Team28770Constants.TELEOP_EXPO_TRANSLATION,
+                Team28770Constants.TELEOP_EXPO_ROTATION,
+                Team28770Constants.TELEOP_MAX_VEL_MM_PER_S,
+                Team28770Constants.TELEOP_MAX_ANG_VEL_RAD_PER_S
+        );
+
+        headingController = new HeadingController(
+                Team28770Constants.HEADING_KP,
+                Team28770Constants.HEADING_KI,
+                Team28770Constants.HEADING_KD
+        );
+
+        vxLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_LINEAR_SLEW_RATE);
+        vyLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_LINEAR_SLEW_RATE);
+        omegaLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_ANGULAR_SLEW_RATE);
+
+        lastLoopTime = getRuntime();
+    }
+
+    @Override
+    public void start()
+    {
+        Pose2d pose = localizer.getPose();
+        headingController.reset(pose.heading);
+        headingController.setTarget(pose.heading);
+        headingHoldTarget = pose.heading;
+        headingHoldActive = false;
+
+        double now = getRuntime();
+        vxLimiter.reset(0.0, now);
+        vyLimiter.reset(0.0, now);
+        omegaLimiter.reset(0.0, now);
+        lastLoopTime = now;
     }
 
     @Override
@@ -40,42 +96,52 @@ public class Team28770TeleOp extends OpMode
     {
         localizer.update();
 
-        double lx = gamepad1.left_stick_x;
-        double ly = gamepad1.left_stick_y;
-        double rx = gamepad1.right_stick_x;
+        double now = getRuntime();
+        double dt = Math.max(now - lastLoopTime, 1e-6);
+        lastLoopTime = now;
 
-        lx = applyDeadband(lx, 0.05);
-        ly = applyDeadband(ly, 0.05);
-        rx = applyDeadband(rx, 0.05);
+        ChassisSpeeds command = TeleOpDriveHelper.robotRelativeFromJoysticks(
+                gamepad1.left_stick_x,
+                gamepad1.left_stick_y,
+                gamepad1.right_stick_x,
+                teleOpConfig
+        );
 
-        lx = cubic(lx);
-        ly = cubic(ly);
-        rx = cubic(rx);
+        Pose2d pose = localizer.getPose();
+        boolean rotationCommanded = Math.abs(gamepad1.right_stick_x) > teleOpConfig.deadband();
+        double omegaCmd;
+        if (rotationCommanded)
+        {
+            headingHoldActive = false;
+            headingHoldTarget = pose.heading;
+            headingController.setTarget(headingHoldTarget);
+            omegaCmd = command.omega;
+        }
+        else
+        {
+            if (!headingHoldActive)
+            {
+                headingHoldTarget = pose.heading;
+                headingController.reset(headingHoldTarget);
+                headingController.setTarget(headingHoldTarget);
+                headingHoldActive = true;
+            }
+            omegaCmd = headingController.update(pose.heading, dt);
+        }
 
-        // Robot-centric mapping:
-        double forward = -ly;
-        double strafeRight = lx;
-        double vx = forward * TELEOP_MAX_VEL_MM_PER_SEC;
-        double vy = -strafeRight * TELEOP_MAX_VEL_MM_PER_SEC;
-        double turn = -rx;
-        double omega = turn * TELEOP_MAX_ANG_VEL;
+        double limitedVx = vxLimiter.calculate(command.vx, now);
+        double limitedVy = vyLimiter.calculate(command.vy, now);
+        double limitedOmega = omegaLimiter.calculate(omegaCmd, now);
 
-        drive.driveRobotRelative(new ChassisSpeeds(vx, vy, omega));
+        ChassisSpeeds limitedSpeeds = new ChassisSpeeds(limitedVx, limitedVy, limitedOmega);
+        drive.driveRobotRelative(limitedSpeeds);
 
-        telemetry.addData("vx (mm/s)", vx);
-        telemetry.addData("vy (mm/s)", vy);
-        telemetry.addData("omega (rad/s)", omega);
+        telemetry.addData("cmd vx (mm/s)", limitedVx);
+        telemetry.addData("cmd vy (mm/s)", limitedVy);
+        telemetry.addData("cmd omega (rad/s)", limitedOmega);
         telemetry.addData("pose", localizer.getPose());
+        telemetry.addData("heading hold", headingHoldActive);
+        telemetry.addData("heading target", headingHoldTarget);
         telemetry.update();
-    }
-
-    private static double applyDeadband(double v, double t)
-    {
-        return Math.abs(v) > t ? v : 0.0;
-    }
-
-    private static double cubic(double x)
-    {
-        return x * x * x;
     }
 }
