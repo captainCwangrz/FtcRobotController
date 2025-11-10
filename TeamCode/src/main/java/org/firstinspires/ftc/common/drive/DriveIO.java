@@ -23,7 +23,7 @@ public interface DriveIO
     /**
      * Optional: directly command normalized wheel powers [-1, 1].
      *
-     * Implementations may override; default throws to highlight unsupported use.
+     * <p>Implementations may override; default throws to highlight unsupported use.</p>
      */
     default void setWheelPowers(WheelSpeeds powers)
     {
@@ -31,21 +31,12 @@ public interface DriveIO
     }
 
     /**
-     * (Optional) Return cumulative wheel travel in mm for each wheel.
-     * Default throws to highlight unsupported use.
+     * Return cumulative wheel travel (mm) for each wheel.
      */
-    default WheelSpeeds getWheelPositions()
-    {
-        throw new UnsupportedOperationException("Wheel position reporting not implemented");
-    }
+    WheelSpeeds getWheelPositions();
 
     /**
-     * (Optional but recommended)
-     * Return the current measured wheel speeds in mm/s.
-     * Implement using encoders if available; default throws to highlight unsupported use.
+     * Return the current measured wheel speeds (mm/s).
      */
-    default WheelSpeeds getWheelVelocities()
-    {
-        throw new UnsupportedOperationException("Wheel velocity reporting not implemented");
-    }
+    WheelSpeeds getWheelVelocities();
 }

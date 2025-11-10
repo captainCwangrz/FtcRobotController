@@ -1,25 +1,24 @@
 package org.firstinspires.ftc.common.drive;
 
 /**
- * Kinematics for a standard 4-wheel mecanum drivetrain.
+ * Kinematics mapping for a standard rectangular 4-wheel mecanum drivetrain.
  *
- * Assumptions:
- *  - Coordinate convention from common.geometry.CoordinateConvention:
- *      +x: forward, +y: left, omega: CCW+.
- *  - Wheel layout is rectangular using wheel order (fl, fr, bl, br).
- *  - wheelBaseMm: distance between front and back wheel centers (mm).
- *  - trackWidthMm: distance between left and right wheel centers (mm).
+ * <p>Geometry definitions:</p>
+ * <ul>
+ *     <li>{@code wheelBaseMm}: distance between the front and rear wheel centers (mm)</li>
+ *     <li>{@code trackWidthMm}: distance between the left and right wheel centers (mm)</li>
+ *     <li>Wheel order: {@code fl}, {@code fr}, {@code bl}, {@code br}</li>
+ * </ul>
  *
- * This class converts between:
- *  - ChassisSpeeds (vx, vy, omega) in ROBOT frame
- *  - WheelSpeeds (fl, fr, bl, br) linear speeds (mm/s).
+ * <p>All inputs/outputs follow the project convention:</p>
+ * <ul>
+ *     <li>Chassis speeds {@link ChassisSpeeds}: robot frame, {@code vx}/{@code vy} in mm/s, {@code omega} in rad/s</li>
+ *     <li>Wheel speeds {@link WheelSpeeds}: individual wheel linear speeds in mm/s</li>
+ * </ul>
  */
 public class MecanumKinematics
 {
-    // Half distances from robot center to wheel rows/columns
-    private final double halfWheelBase;
-    private final double halfTrackWidth;
-    // Combined lever arm used in standard mecanum kinematics
+    // Combined lever arm used in standard mecanum kinematics.
     private final double k;
 
     /**
@@ -28,17 +27,18 @@ public class MecanumKinematics
      */
     public MecanumKinematics(double wheelBaseMm, double trackWidthMm)
     {
-        this.halfWheelBase = wheelBaseMm / 2.0;
-        this.halfTrackWidth = trackWidthMm / 2.0;
-        this.k = halfWheelBase + halfTrackWidth;
+        this.k = (wheelBaseMm + trackWidthMm) / 2.0;
     }
 
     /**
-     * Forward kinematics:
-     * Given wheel linear speeds (mm/s), compute chassis velocities in ROBOT frame.
+     * Forward kinematics: convert wheel speeds (mm/s) to robot-frame chassis speeds (mm/s, rad/s).
      *
-     * @param wheelSpeeds wheel speeds (fl, fr, bl, br), mm/s
-     * @return chassis speeds (vx, vy, omega), vx/vy in mm/s, omega in rad/s
+     * <p>Uses the standard mecanum equations:</p>
+     * <pre>
+     * vx    = (fl + fr + bl + br) / 4
+     * vy    = (-fl + fr + bl - br) / 4
+     * omega = (-fl + fr - bl + br) / (4 k)
+     * </pre>
      */
     public ChassisSpeeds toChassisSpeeds(WheelSpeeds wheelSpeeds)
     {
@@ -55,11 +55,15 @@ public class MecanumKinematics
     }
 
     /**
-     * Inverse kinematics:
-     * Given desired chassis velocities in ROBOT frame, compute wheel linear speeds.
+     * Inverse kinematics: convert robot-frame chassis speeds (mm/s, rad/s) to wheel speeds (mm/s).
      *
-     * @param speeds chassis speeds in ROBOT frame (vx, vy, omega)
-     * @return wheel linear speeds (fl, fr, bl, br), mm/s
+     * <p>Uses the standard mecanum equations:</p>
+     * <pre>
+     * fl = vx - vy - omega k
+     * fr = vx + vy + omega k
+     * bl = vx + vy - omega k
+     * br = vx - vy + omega k
+     * </pre>
      */
     public WheelSpeeds toWheelSpeeds(ChassisSpeeds speeds)
     {

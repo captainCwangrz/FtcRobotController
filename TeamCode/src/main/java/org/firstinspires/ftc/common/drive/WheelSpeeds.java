@@ -1,18 +1,19 @@
 package org.firstinspires.ftc.common.drive;
 
 /**
- * Linear speeds of a 4-mecanum wheel drivetrain.
+ * Linear wheel speeds for a 4-wheel mecanum drivetrain.
  *
- * Units:
- *  - All fields are linear wheel speeds along the driving direction (mm/s).
+ * <p>Units: all fields are linear wheel speeds along each wheel's rolling direction (mm/s).</p>
  *
- * Wheel order convention:
- *  - fl: front-left
- *  - fr: front-right
- *  - bl: back-left
- *  - br: back-right
+ * <p>Wheel order convention:
+ * <ul>
+ *     <li>{@code fl}: front-left</li>
+ *     <li>{@code fr}: front-right</li>
+ *     <li>{@code bl}: back-left</li>
+ *     <li>{@code br}: back-right</li>
+ * </ul>
  *
- * This is a math container, not tied to specific motor IDs.
+ * <p>This is a pure math container; it does not reference hardware identifiers.</p>
  */
 public class WheelSpeeds
 {
@@ -30,7 +31,7 @@ public class WheelSpeeds
     }
 
     /**
-     * Scale all wheel speeds by a factor.
+     * Returns a new {@link WheelSpeeds} scaled by {@code s}.
      */
     public WheelSpeeds times(double s)
     {
@@ -38,8 +39,9 @@ public class WheelSpeeds
     }
 
     /**
-     * If any magnitude exceeds max, scale all down proportionally to fit.
-     * Useful for normalizing commands to within allowed wheel speed.
+     * Mutates this instance so that the maximum absolute wheel speed is {@code maxMagnitude} mm/s.
+     *
+     * <p>If all wheels are already within the limit the values are unchanged.</p>
      */
     public void normalize(double maxMagnitude)
     {
@@ -55,6 +57,17 @@ public class WheelSpeeds
             bl *= scale;
             br *= scale;
         }
+    }
+
+    /**
+     * Returns the largest absolute wheel speed (mm/s).
+     */
+    public double maxAbs()
+    {
+        return Math.max(
+                Math.max(Math.abs(fl), Math.abs(fr)),
+                Math.max(Math.abs(bl), Math.abs(br))
+        );
     }
 
     @Override
