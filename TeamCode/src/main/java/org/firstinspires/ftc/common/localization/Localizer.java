@@ -5,13 +5,16 @@ import org.firstinspires.ftc.common.geometry.Pose2d;
 /**
  * Generic robot pose estimator.
  *
- * Implementations may use encoders, IMU, external sensors, etc.
- * All poses are expressed in the FIELD frame using the global convention in mm & rad.
+ * <p>Implementations may use dead wheels, IMU fusion, vision, or any other hardware. The
+ * contract simply guarantees that callers can poll the current pose expressed in the
+ * <strong>field frame</strong> using millimetres and radians.</p>
  */
 public interface Localizer
 {
     /**
-     * Get the current estimated robot pose in the FIELD frame (mm, rad).
+     * Returns the current estimated robot pose in the <strong>field frame</strong>.
+     *
+     * @return pose in millimetres (x/y) and radians (heading)
      */
     Pose2d getPose();
 

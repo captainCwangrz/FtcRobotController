@@ -4,22 +4,32 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.common.GoBildaPinpointDriver;
 import org.firstinspires.ftc.common.drive.ChassisSpeeds;
+import org.firstinspires.ftc.common.geometry.MathUtil;
 import org.firstinspires.ftc.common.geometry.Pose2d;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 
+import java.util.Objects;
+
 /**
  * Localizer backed by the goBILDA Pinpoint driver returning mm & rad values.
  */
 public class PinpointLocalizer implements Localizer
 {
+    private static final DistanceUnit OUTPUT_DISTANCE_UNIT = DistanceUnit.MM;
+    private static final AngleUnit OUTPUT_ANGLE_UNIT = AngleUnit.RADIANS;
+    private static final double MIN_DT_SECONDS = 1e-6;
+
+    private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds(0.0, 0.0, 0.0);
+
     private final GoBildaPinpointDriver pinpoint;
-    private final DistanceUnit distanceUnit;
-    private Pose2d pose = new Pose2d(0.0, 0.0, 0.0);
-    private ChassisSpeeds velRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
-    private ChassisSpeeds accRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
+    private final DistanceUnit driverDistanceUnit;
+
+    private Pose2d pose = zeroPose();
+    private ChassisSpeeds velRobot = ZERO_SPEEDS;
+    private ChassisSpeeds accRobot = ZERO_SPEEDS;
     private ChassisSpeeds lastVel = null;
     private long lastVelTimeNanos = 0L;
 
@@ -46,7 +56,7 @@ public class PinpointLocalizer implements Localizer
             boolean resetOnInit
     )
     {
-        this.distanceUnit = distanceUnit;
+        this.driverDistanceUnit = Objects.requireNonNull(distanceUnit, "distanceUnit");
         this.pinpoint = hw.get(GoBildaPinpointDriver.class, deviceName);
 
         pinpoint.setEncoderResolution(podType);
@@ -65,15 +75,15 @@ public class PinpointLocalizer implements Localizer
         pinpoint.update();
 
         // --- Pose ---
-        Pose2D p = pinpoint.getPosition();
-        double x = DistanceUnit.MM.fromUnit(distanceUnit, p.getX(distanceUnit));
-        double y = DistanceUnit.MM.fromUnit(distanceUnit, p.getY(distanceUnit));
-        double heading = p.getHeading(AngleUnit.RADIANS);
+        Pose2D rawPose = Objects.requireNonNull(pinpoint.getPosition(), "pinpoint position");
+        double x = toOutputDistance(rawPose.getX(driverDistanceUnit));
+        double y = toOutputDistance(rawPose.getY(driverDistanceUnit));
+        double heading = MathUtil.wrapAngle(rawPose.getHeading(OUTPUT_ANGLE_UNIT));
         pose = new Pose2d(x, y, heading);
 
         // --- Velocity  ---
-        double vx = DistanceUnit.MM.fromUnit(distanceUnit, pinpoint.getVelX(distanceUnit));
-        double vy = DistanceUnit.MM.fromUnit(distanceUnit, pinpoint.getVelY(distanceUnit));
+        double vx = toOutputDistance(pinpoint.getVelX(driverDistanceUnit));
+        double vy = toOutputDistance(pinpoint.getVelY(driverDistanceUnit));
         double omega = pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
 
         ChassisSpeeds newVel = new ChassisSpeeds(vx, vy, omega);
@@ -84,7 +94,8 @@ public class PinpointLocalizer implements Localizer
         if (lastVel != null && lastVelTimeNanos != 0L)
         {
             double dt = (now - lastVelTimeNanos) * 1e-9;
-            if (dt > 1e-6) {
+            if (dt > MIN_DT_SECONDS)
+            {
                 double ax = (newVel.vx - lastVel.vx) / dt;
                 double ay = (newVel.vy - lastVel.vy) / dt;
                 double aOmega = (newVel.omega - lastVel.omega) / dt;
@@ -104,33 +115,33 @@ public class PinpointLocalizer implements Localizer
     @Override
     public void setPose(Pose2d newPose)
     {
-        if (newPose == null) return;
+        Objects.requireNonNull(newPose, "pose");
 
         Pose2D pinPose = new Pose2D(
-                distanceUnit,
-                distanceUnit.fromUnit(DistanceUnit.MM, newPose.x),
-                distanceUnit.fromUnit(DistanceUnit.MM, newPose.y),
-                AngleUnit.RADIANS,
+                driverDistanceUnit,
+                driverDistanceUnit.fromUnit(OUTPUT_DISTANCE_UNIT, newPose.x),
+                driverDistanceUnit.fromUnit(OUTPUT_DISTANCE_UNIT, newPose.y),
+                OUTPUT_ANGLE_UNIT,
                 newPose.heading
         );
         pinpoint.setPosition(pinPose);
 
-        pose = newPose;
+        pose = new Pose2d(newPose.x, newPose.y, newPose.heading);
 
         lastVel = null;
         lastVelTimeNanos = 0L;
-        velRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
-        accRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
+        velRobot = ZERO_SPEEDS;
+        accRobot = ZERO_SPEEDS;
     }
 
     public void resetAll()
     {
         pinpoint.resetPosAndIMU();
-        pose = new Pose2d(0.0, 0.0, 0.0);
+        pose = zeroPose();
         lastVel = null;
         lastVelTimeNanos = 0L;
-        velRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
-        accRobot = new ChassisSpeeds(0.0, 0.0, 0.0);
+        velRobot = ZERO_SPEEDS;
+        accRobot = ZERO_SPEEDS;
     }
 
     public ChassisSpeeds getRobotVelocity()
@@ -141,5 +152,15 @@ public class PinpointLocalizer implements Localizer
     public ChassisSpeeds getRobotAcceleration()
     {
         return accRobot;
+    }
+
+    private static Pose2d zeroPose()
+    {
+        return new Pose2d(0.0, 0.0, 0.0);
+    }
+
+    private double toOutputDistance(double value)
+    {
+        return OUTPUT_DISTANCE_UNIT.fromUnit(driverDistanceUnit, value);
     }
 }
