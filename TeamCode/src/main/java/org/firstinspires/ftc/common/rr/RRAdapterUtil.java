@@ -15,25 +15,23 @@ public final class RRAdapterUtil
     {
     }
 
-    public static com.acmerobotics.roadrunner.geometry.Pose2d toRoadRunnerPose(Pose2d pose)
+    public static com.acmerobotics.roadrunner.Pose2d toRoadRunnerPose(Pose2d pose)
     {
         Objects.requireNonNull(pose, "pose");
-        // TODO: confirm RR units
-        return new com.acmerobotics.roadrunner.geometry.Pose2d(
-            pose.x / MILLIMETERS_PER_METER,
-            pose.y / MILLIMETERS_PER_METER,
-            pose.heading
+        return new com.acmerobotics.roadrunner.Pose2d(
+                pose.x / MILLIMETERS_PER_METER,
+                pose.y / MILLIMETERS_PER_METER,
+                pose.heading
         );
     }
 
-    public static Pose2d toCommonPose(com.acmerobotics.roadrunner.geometry.Pose2d pose)
+    public static Pose2d toCommonPose(com.acmerobotics.roadrunner.Pose2d pose)
     {
         Objects.requireNonNull(pose, "pose");
-        // TODO: confirm RR units
         return new Pose2d(
-            pose.getX() * MILLIMETERS_PER_METER,
-            pose.getY() * MILLIMETERS_PER_METER,
-            pose.getHeading()
+                pose.position.x * MILLIMETERS_PER_METER,
+                pose.position.y * MILLIMETERS_PER_METER,
+                pose.heading.log()
         );
     }
 }

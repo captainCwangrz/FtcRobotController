@@ -23,21 +23,41 @@ public class Team28770Constants
     public static final String MOTOR_BR = "br";
 
     // Linear dimensions in millimeters
-    public static final double WHEEL_RADIUS_MM = 0.0; // TODO: measure
-    public static final double WHEEL_BASE_MM   = 0.0; // front-back distance, TODO: measure
-    public static final double TRACK_WIDTH_MM  = 0.0; // left-right distance, TODO: measure
+    public static final double WHEEL_RADIUS_MM = 48.0; // TODO: measure actual
+    public static final double WHEEL_BASE_MM   = 330.0; // front-back distance, TODO: measure
+    public static final double TRACK_WIDTH_MM  = 330.0; // left-right distance, TODO: measure
 
     // Encoder/motor config
-    public static final double TICKS_PER_REV = 0.0;
-    public static final double GEAR_RATIO    = 0.0;       // wheel rev / motor rev
+    public static final double TICKS_PER_REV = 537.6; // TODO: confirm motor
+    public static final double GEAR_RATIO    = 1.0;       // wheel rev / motor rev, TODO: confirm
 
     // Derived: millimeters per wheel revolution
     public static final double WHEEL_CIRCUMFERENCE_MM = 2.0 * Math.PI * WHEEL_RADIUS_MM;
 
     // Max wheel speed estimates (for normalization / motion constraints)
     // You can refine these later with tests.
-    public static final double MAX_WHEEL_RPS = 0.0; // TODO: measure
-    public static final double MAX_WHEEL_MM_PER_SEC = MAX_WHEEL_RPS * WHEEL_CIRCUMFERENCE_MM;
+    public static final double MAX_WHEEL_SPEED_MM_PER_S = 1500.0; // TODO: tune
+    public static final double MAX_WHEEL_RPS = MAX_WHEEL_SPEED_MM_PER_S / WHEEL_CIRCUMFERENCE_MM;
+
+    // TeleOp input shaping configuration (stick space -> mm/s, rad/s)
+    public static final double TELEOP_DEADBAND = 0.05;               // TODO: tune
+    public static final double TELEOP_EXPO_TRANSLATION = 0.25;       // TODO: tune
+    public static final double TELEOP_EXPO_ROTATION = 0.3;           // TODO: tune
+    public static final double TELEOP_MAX_VEL_MM_PER_S = 1200.0;     // TODO: tune
+    public static final double TELEOP_MAX_ANG_VEL_RAD_PER_S = 4.0;   // TODO: tune
+    public static final double TELEOP_LINEAR_SLEW_RATE = 3000.0;     // mm/s^2, TODO: tune
+    public static final double TELEOP_ANGULAR_SLEW_RATE = 8.0;       // rad/s^2, TODO: tune
+
+    // Heading regulation (TeleOp hold) gains
+    public static final double HEADING_KP = 4.0;    // TODO: tune
+    public static final double HEADING_KI = 0.0;    // TODO: tune
+    public static final double HEADING_KD = 0.4;    // TODO: tune
+
+    // Autonomous motion limits
+    public static final double AUTO_MAX_VEL_MM_PER_S = 1000.0;       // TODO: tune
+    public static final double AUTO_MAX_ACCEL_MM_PER_S2 = 1200.0;    // TODO: tune
+    public static final double AUTO_MAX_ANG_VEL_RAD_PER_S = 4.0;     // TODO: tune
+    public static final double AUTO_MAX_ANG_ACCEL_RAD_PER_S2 = 6.0;  // TODO: tune
 
     // Pinpoint config
     public static final String PINPOINT_NAME = "pinpoint";
