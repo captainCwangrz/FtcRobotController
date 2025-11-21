@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.team28770_SYSNG.opmode;
+﻿package org.firstinspires.ftc.team28770_SYSNG.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,7 +12,9 @@ import org.firstinspires.ftc.common.control.TeleOpDriveHelper;
 import org.firstinspires.ftc.common.drive.ChassisSpeeds;
 import org.firstinspires.ftc.common.drive.MecanumDrive;
 import org.firstinspires.ftc.common.drive.MecanumKinematics;
+import org.firstinspires.ftc.common.geometry.FrameTransform;
 import org.firstinspires.ftc.common.geometry.Pose2d;
+import org.firstinspires.ftc.common.geometry.Vector2d;
 import org.firstinspires.ftc.common.localization.Localizer;
 import org.firstinspires.ftc.common.localization.PinpointLocalizer;
 import org.firstinspires.ftc.team28770_SYSNG.Team28770Constants;
@@ -98,7 +100,7 @@ public class Team28770TeleOp extends OpMode
                 Team28770Constants.TELEOP_ANG_DECEL_SLEW
         );
 
-        telemetry.addLine("初始化完毕");
+        telemetry.addLine("Init complete");
         telemetry.update();
     }
 
@@ -106,7 +108,7 @@ public class Team28770TeleOp extends OpMode
     public void start()
     {
         timer.reset();
-        lastLoopTime = timer.seconds(); // ?
+        lastLoopTime = timer.seconds();
 
         localizer.update();
         Pose2d startPose = localizer.getPose();
@@ -136,23 +138,26 @@ public class Team28770TeleOp extends OpMode
         if (gamepad1.leftBumperWasPressed())
         {
             isFieldCentric = !isFieldCentric;
+            vxLimiter.reset(0.0, now);
+            vyLimiter.reset(0.0, now);
+            omegaLimiter.reset(0.0, now);
         }
 
         // joystick inputs
         double lx = -gamepad1.left_stick_x;
         double ly = gamepad1.left_stick_y;
         double rx = -gamepad1.right_stick_x;
-        ChassisSpeeds rawCommand = isFieldCentric ?
-                TeleOpDriveHelper.fieldRelativeFromJoysticks(lx, ly, rx, pose.heading, teleOpConfig) :
-                TeleOpDriveHelper.robotRelativeFromJoysticks(lx, ly, rx, teleOpConfig);
+
+        // Shape rotation (robot frame)
+        double omegaCmd = TeleOpDriveHelper.shapeInputs(0.0, 0.0, rx, teleOpConfig).omega;
 
         // heading lock
-        boolean rotationIntent = Math.abs(rawCommand.omega) > 1e-4;
+        boolean rotationIntent = Math.abs(omegaCmd) > 1e-4;
         double finalOmegaCmd;
         if (rotationIntent)
         {
             headingHoldActive = false;
-            finalOmegaCmd = omegaLimiter.calculate(rawCommand.omega, now);
+            finalOmegaCmd = omegaLimiter.calculate(omegaCmd, now);
             headingHoldTarget = pose.heading;
         }
         else
@@ -168,9 +173,24 @@ public class Team28770TeleOp extends OpMode
             finalOmegaCmd = headingController.update(pose.heading, dt);
         }
 
-        // slew rate limits
-        double limitedVx = vxLimiter.calculate(rawCommand.vx, now);
-        double limitedVy = vyLimiter.calculate(rawCommand.vy, now);
+        double limitedVx;
+        double limitedVy;
+
+        if (isFieldCentric)
+        {
+            ChassisSpeeds fieldCmd = TeleOpDriveHelper.shapeInputs(lx, ly, 0.0, teleOpConfig);
+            double vxFieldLimited = vxLimiter.calculate(fieldCmd.vx, now);
+            double vyFieldLimited = vyLimiter.calculate(fieldCmd.vy, now);
+            Vector2d robotVel = FrameTransform.fieldToRobotVel(vxFieldLimited, vyFieldLimited, pose.heading);
+            limitedVx = robotVel.x;
+            limitedVy = robotVel.y;
+        }
+        else
+        {
+            ChassisSpeeds robotRaw = TeleOpDriveHelper.shapeInputs(lx, ly, 0.0, teleOpConfig);
+            limitedVx = vxLimiter.calculate(robotRaw.vx, now);
+            limitedVy = vyLimiter.calculate(robotRaw.vy, now);
+        }
 
         // send commands to drivetrain
         ChassisSpeeds finalSpeeds = new ChassisSpeeds(limitedVx, limitedVy, finalOmegaCmd);

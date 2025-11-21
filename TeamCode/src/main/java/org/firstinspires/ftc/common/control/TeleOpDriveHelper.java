@@ -11,15 +11,24 @@ public final class TeleOpDriveHelper
     private TeleOpDriveHelper() {}
 
     /**
-     * Convert raw joystick values into robot-relative chassis speeds.
+     * Applies deadband, exponential scaling, and velocity limits to raw joystick inputs.
+     *
+     * <p><b>Coordinate Frame Note:</b></p>
+     * <ul>
+     * <li>{@code vx, vy}: Returned in the <b>Input Frame</b> (Joystick Up/Left).
+     * If used for Field-Centric drive, these represent Field North (+x) / West (+y).
+     * If used for Robot-Centric drive, these represent Robot Forward (+x) / Left (+y).</li>
+     * <li>{@code omega}: Always returned in the <b>Robot Frame</b> (CCW rotation rate).
+     * This value is invariant under frame rotation.</li>
+     * </ul>
      *
      * @param lx  left stick x, unitless strafe command (+ left).
      * @param ly  left stick y, unitless forward command (+ up on stick).
      * @param rx  right stick x, unitless CCW rotation command.
      * @param cfg configuration describing deadband, expo, and limits.
-     * @return robot-frame chassis speeds in mm/s and rad/s.
+     * @return shaped chassis speeds (mm/s, rad/s) without any frame rotation applied.
      */
-    public static ChassisSpeeds robotRelativeFromJoysticks(double lx, double ly, double rx, TeleOpConfig cfg)
+    public static ChassisSpeeds shapeInputs(double lx, double ly, double rx, TeleOpConfig cfg)
     {
         double vxInput = InputShaping.applyDeadband(-ly, cfg.deadband());
         vxInput = InputShaping.applyExpo(vxInput, cfg.expoTranslation());
@@ -37,6 +46,21 @@ public final class TeleOpDriveHelper
     }
 
     /**
+     * Convert raw joystick values into robot-relative chassis speeds.
+     *
+     * @param lx  left stick x, unitless strafe command (+ left).
+     * @param ly  left stick y, unitless forward command (+ up on stick).
+     * @param rx  right stick x, unitless CCW rotation command.
+     * @param cfg configuration describing deadband, expo, and limits.
+     * @return robot-frame chassis speeds in mm/s and rad/s.
+     */
+    public static ChassisSpeeds robotRelativeFromJoysticks(double lx, double ly, double rx, TeleOpConfig cfg)
+    {
+        // In robot-centric mode, the input frame already matches the robot frame.
+        return shapeInputs(lx, ly, rx, cfg);
+    }
+
+    /**
      * Convert raw joystick values into field-relative chassis speeds and return the equivalent robot-frame command.
      *
      * @param lx       left stick x, unitless strafe command (+ field left).
@@ -48,19 +72,8 @@ public final class TeleOpDriveHelper
      */
     public static ChassisSpeeds fieldRelativeFromJoysticks(double lx, double ly, double rx, double heading, TeleOpConfig cfg)
     {
-        double vxFieldInput = InputShaping.applyDeadband(-ly, cfg.deadband());
-        vxFieldInput = InputShaping.applyExpo(vxFieldInput, cfg.expoTranslation());
-        double vxField = InputShaping.scale(vxFieldInput, cfg.maxVelMmPerS());
-
-        double vyFieldInput = InputShaping.applyDeadband(lx, cfg.deadband());
-        vyFieldInput = InputShaping.applyExpo(vyFieldInput, cfg.expoTranslation());
-        double vyField = InputShaping.scale(vyFieldInput, cfg.maxVelMmPerS());
-
-        double omegaInput = InputShaping.applyDeadband(rx, cfg.deadband());
-        omegaInput = InputShaping.applyExpo(omegaInput, cfg.expoRotation());
-        double omega = InputShaping.scale(omegaInput, cfg.maxAngVelRadPerS());
-
-        ChassisSpeeds fieldSpeeds = new ChassisSpeeds(vxField, vyField, omega);
+        ChassisSpeeds shaped = shapeInputs(lx, ly, rx, cfg);
+        ChassisSpeeds fieldSpeeds = new ChassisSpeeds(shaped.vx, shaped.vy, shaped.omega);
         return FrameTransform.fieldToRobot(fieldSpeeds, heading);
     }
 }
