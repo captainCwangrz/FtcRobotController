@@ -181,9 +181,11 @@ public class Team28770TeleOp extends OpMode
             ChassisSpeeds fieldCmd = TeleOpDriveHelper.shapeInputs(lx, ly, 0.0, teleOpConfig);
             double vxFieldLimited = vxLimiter.calculate(fieldCmd.vx, now);
             double vyFieldLimited = vyLimiter.calculate(fieldCmd.vy, now);
-            Vector2d robotVel = FrameTransform.fieldToRobotVel(vxFieldLimited, vyFieldLimited, pose.heading);
-            limitedVx = robotVel.x;
-            limitedVy = robotVel.y;
+            ChassisSpeeds robotVel = FrameTransform.fieldToRobot(
+                    new ChassisSpeeds(vxFieldLimited, vyFieldLimited, 0.0),
+                    pose.heading);
+            limitedVx = robotVel.vx;
+            limitedVy = robotVel.vy;
         }
         else
         {
