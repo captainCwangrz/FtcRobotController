@@ -135,12 +135,16 @@ public class Team28770TeleOp extends OpMode
         double dt = now - lastLoopTime;
         lastLoopTime = now;
 
+        // Current angular speed for seeding the omega slew limiter; small deadband removes noise
+        double rawOmega = localizer.getRobotVelocity().omega;
+        double seededOmega = Math.abs(rawOmega) < 1e-3 ? 0.0 : rawOmega;
+
         if (gamepad1.leftBumperWasPressed())
         {
             isFieldCentric = !isFieldCentric;
             vxLimiter.reset(0.0, now);
             vyLimiter.reset(0.0, now);
-            omegaLimiter.reset(0.0, now);
+            omegaLimiter.reset(seededOmega, now);
         }
 
         // joystick inputs
@@ -169,7 +173,7 @@ public class Team28770TeleOp extends OpMode
                 headingController.setTarget(headingHoldTarget);
                 headingHoldActive = true;
             }
-            omegaLimiter.reset(0.0, now);
+            omegaLimiter.reset(seededOmega, now);
             finalOmegaCmd = headingController.update(pose.heading, dt);
         }
 
