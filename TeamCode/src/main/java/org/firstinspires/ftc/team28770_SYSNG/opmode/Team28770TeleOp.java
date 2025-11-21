@@ -37,7 +37,7 @@ public class Team28770TeleOp extends OpMode
     // States
     private boolean headingHoldActive = false;
     private double headingHoldTarget = 0.0;
-    private boolean isFeildCentric = false;
+    private boolean isFieldCentric = false;
     private double lastLoopTime = 0.0;
     private final ElapsedTime timer = new ElapsedTime();
 
@@ -135,14 +135,14 @@ public class Team28770TeleOp extends OpMode
 
         if (gamepad1.leftBumperWasPressed())
         {
-            isFeildCentric = !isFeildCentric;
+            isFieldCentric = !isFieldCentric;
         }
 
         // joystick inputs
         double lx = -gamepad1.left_stick_x;
         double ly = gamepad1.left_stick_y;
         double rx = -gamepad1.right_stick_x;
-        ChassisSpeeds rawCommand = isFeildCentric ?
+        ChassisSpeeds rawCommand = isFieldCentric ?
                 TeleOpDriveHelper.fieldRelativeFromJoysticks(lx, ly, rx, pose.heading, teleOpConfig) :
                 TeleOpDriveHelper.robotRelativeFromJoysticks(lx, ly, rx, teleOpConfig);
 
