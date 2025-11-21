@@ -85,9 +85,18 @@ public class Team28770TeleOp extends OpMode
         );
 
         // slew rate limiter init
-        vxLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_LINEAR_SLEW_RATE);
-        vyLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_LINEAR_SLEW_RATE);
-        omegaLimiter = new SlewRateLimiter(Team28770Constants.TELEOP_ANGULAR_SLEW_RATE);
+        vxLimiter = new SlewRateLimiter(
+                Team28770Constants.TELEOP_LINEAR_ACCEL_SLEW,
+                Team28770Constants.TELEOP_LINEAR_DECEL_SLEW
+        );
+        vyLimiter = new SlewRateLimiter(
+                Team28770Constants.TELEOP_LINEAR_ACCEL_SLEW,
+                Team28770Constants.TELEOP_LINEAR_DECEL_SLEW
+        );
+        omegaLimiter = new SlewRateLimiter(
+                Team28770Constants.TELEOP_ANG_ACCEL_SLEW,
+                Team28770Constants.TELEOP_ANG_DECEL_SLEW
+        );
 
         telemetry.addLine("初始化完毕");
         telemetry.update();
@@ -101,15 +110,16 @@ public class Team28770TeleOp extends OpMode
 
         localizer.update();
         Pose2d startPose = localizer.getPose();
+        ChassisSpeeds startVel = localizer.getRobotVelocity();
         headingHoldTarget = startPose.heading;
         headingHoldActive = true;
 
         headingController.reset(startPose.heading);
         headingController.setTarget(headingHoldTarget);
 
-        vxLimiter.reset(0.0, lastLoopTime);
-        vyLimiter.reset(0.0, lastLoopTime);
-        omegaLimiter.reset(0.0, lastLoopTime);
+        vxLimiter.reset(startVel.vx, lastLoopTime);
+        vyLimiter.reset(startVel.vy, lastLoopTime);
+        omegaLimiter.reset(startVel.omega, lastLoopTime);
     }
 
     @Override

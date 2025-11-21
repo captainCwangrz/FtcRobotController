@@ -6,15 +6,31 @@ package org.firstinspires.ftc.common.control;
  */
 public class SlewRateLimiter
 {
-    private final double rateLimit;
+    private final double accelLimit;
+    private final double decelLimit;
 
     private double previousValue;
     private double previousTimeSeconds;
     private boolean initialized;
 
+    /**
+     * Symmetric slew limiter (legacy behavior).
+     */
     public SlewRateLimiter(double rateLimit)
     {
-        this.rateLimit = Math.abs(rateLimit);
+        this(rateLimit, rateLimit);
+    }
+
+    /**
+     * Asymmetric slew limiter.
+     *
+     * @param accelLimit maximum positive change rate (units per second) when the command is increasing
+     * @param decelLimit maximum negative change rate (units per second) when the command is decreasing
+     */
+    public SlewRateLimiter(double accelLimit, double decelLimit)
+    {
+        this.accelLimit = Math.abs(accelLimit);
+        this.decelLimit = Math.abs(decelLimit);
     }
 
     public double calculate(double input, double timeSeconds)
@@ -33,8 +49,11 @@ public class SlewRateLimiter
             return previousValue;
         }
 
-        double maxDelta = rateLimit * deltaTime;
         double delta = input - previousValue;
+
+        double limit = delta >= 0.0 ? accelLimit : decelLimit;
+        double maxDelta = limit * deltaTime;
+
         if (delta > maxDelta)
         {
             delta = maxDelta;
@@ -56,9 +75,20 @@ public class SlewRateLimiter
         initialized = true;
     }
 
-    public double getRateLimit()
+    /**
+     * @return positive rate limit when ramping up (units/s)
+     */
+    public double getAccelLimit()
     {
-        return rateLimit;
+        return accelLimit;
+    }
+
+    /**
+     * @return positive rate limit when ramping down (units/s)
+     */
+    public double getDecelLimit()
+    {
+        return decelLimit;
     }
 
     public double getLastValue()

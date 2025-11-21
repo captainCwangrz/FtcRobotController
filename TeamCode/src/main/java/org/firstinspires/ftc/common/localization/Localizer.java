@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.common.localization;
 
+import org.firstinspires.ftc.common.drive.ChassisSpeeds;
 import org.firstinspires.ftc.common.geometry.Pose2d;
 
 /**
@@ -32,4 +33,12 @@ public interface Localizer
      * Call once per loop (or at a fixed rate) from OpMode.
      */
     void update();
+
+    /**
+     * Return the estimated robot-frame velocity (optional; default is zero).
+     */
+    default ChassisSpeeds getRobotVelocity()
+    {
+        return new ChassisSpeeds(0.0, 0.0, 0.0);
+    }
 }

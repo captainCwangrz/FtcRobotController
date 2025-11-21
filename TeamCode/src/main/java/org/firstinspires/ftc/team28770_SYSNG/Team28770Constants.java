@@ -45,8 +45,12 @@ public class Team28770Constants
     public static final double TELEOP_EXPO_ROTATION = 0.3;           // TODO: tune
     public static final double TELEOP_MAX_VEL_MM_PER_S = 1200.0;     // TODO: tune
     public static final double TELEOP_MAX_ANG_VEL_RAD_PER_S = 4.0;   // TODO: tune
-    public static final double TELEOP_LINEAR_SLEW_RATE = 3000.0;     // mm/s^2, TODO: tune
-    public static final double TELEOP_ANGULAR_SLEW_RATE = 8.0;       // rad/s^2, TODO: tune
+    public static final double TELEOP_LINEAR_SLEW_RATE = 3000.0;     // mm/s^2, TODO: tune (symmetric legacy)
+    public static final double TELEOP_ANGULAR_SLEW_RATE = 8.0;       // rad/s^2, TODO: tune (symmetric legacy)
+    public static final double TELEOP_LINEAR_ACCEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (increasing command)
+    public static final double TELEOP_LINEAR_DECEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (decreasing command)
+    public static final double TELEOP_ANG_ACCEL_SLEW = 8.0;          // rad/s^2, TODO: tune (increasing command)
+    public static final double TELEOP_ANG_DECEL_SLEW = 8.0;          // rad/s^2, TODO: tune (decreasing command)
 
     // Heading regulation (TeleOp hold) gains
     public static final double HEADING_KP = 4.0;    // TODO: tune
