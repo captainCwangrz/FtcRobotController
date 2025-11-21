@@ -26,8 +26,8 @@ public class Team28770MecanumDriveIO implements DriveIO
         br = hw.get(DcMotorEx.class, Team28770Constants.MOTOR_BR);
 
         // Direction fixes ONLY live here.
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        bl.setDirection(DcMotorSimple.Direction.FORWARD);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
