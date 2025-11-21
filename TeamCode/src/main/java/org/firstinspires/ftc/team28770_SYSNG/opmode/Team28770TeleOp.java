@@ -164,6 +164,7 @@ public class Team28770TeleOp extends OpMode
                 headingController.setTarget(headingHoldTarget);
                 headingHoldActive = true;
             }
+            omegaLimiter.reset(0.0, now);
             finalOmegaCmd = headingController.update(pose.heading, dt);
         }
 
