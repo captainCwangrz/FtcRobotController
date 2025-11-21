@@ -14,7 +14,7 @@ public class HeadingController
         this.pid = new PIDController(kP, kI, kD);
         this.pid.enableContinuousInput(-Math.PI, Math.PI);
         this.kS = Math.abs(kS);
-        this.deadband = Math.abs(deadband)
+        this.deadband = Math.abs(deadband);
     }
 
     /**
