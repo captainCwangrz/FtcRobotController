@@ -6,11 +6,15 @@ package org.firstinspires.ftc.common.control;
 public class HeadingController
 {
     private final PIDController pid;
+    private final double kS; // rad/s
+    private final double deadband; // rad
 
-    public HeadingController(double kP, double kI, double kD)
+    public HeadingController(double kP, double kI, double kD, double kS, double deadband)
     {
         this.pid = new PIDController(kP, kI, kD);
         this.pid.enableContinuousInput(-Math.PI, Math.PI);
+        this.kS = Math.abs(kS);
+        this.deadband = Math.abs(deadband)
     }
 
     /**
@@ -32,12 +36,27 @@ public class HeadingController
      */
     public double update(double currentHeading, double dt)
     {
-        return pid.calculate(currentHeading, dt);
+        double pidOutput = pid.calculate(currentHeading, dt);
+        double error = pid.getPositionError();
+
+        if (Math.abs(error) > deadband)
+        {
+            return pidOutput + Math.signum(pidOutput) * kS;
+        }
+        else
+        {
+            return 0.0;
+        }
     }
 
     public double getTarget()
     {
         return pid.getSetpoint();
+    }
+
+    public double getError()
+    {
+        return pid.getPositionError();
     }
 
     public void reset(double currentHeading)

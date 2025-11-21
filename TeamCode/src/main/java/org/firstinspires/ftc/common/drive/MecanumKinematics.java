@@ -27,7 +27,7 @@ public class MecanumKinematics
      */
     public MecanumKinematics(double wheelBaseMm, double trackWidthMm)
     {
-        this.k = (wheelBaseMm + trackWidthMm) / 2.0;
+        this.k = Math.sqrt((wheelBaseMm * wheelBaseMm) / 2 + (trackWidthMm * trackWidthMm) / 2);
     }
 
     /**

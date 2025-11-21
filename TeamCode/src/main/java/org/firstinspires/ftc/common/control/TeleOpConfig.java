@@ -12,10 +12,44 @@ package org.firstinspires.ftc.common.control;
  *     <li>{@code maxAngVelRadPerS}: maximum angular velocity command, rad/s.</li>
  * </ul>
  */
-public record TeleOpConfig(
-        double deadband,
-        double expoTranslation,
-        double expoRotation,
-        double maxVelMmPerS,
-        double maxAngVelRadPerS
-) {}
+public final class TeleOpConfig {
+    private final double deadband;
+    private final double expoTranslation;
+    private final double expoRotation;
+    private final double maxVelMmPerS;
+    private final double maxAngVelRadPerS;
+
+    public TeleOpConfig(
+            double deadband,
+            double expoTranslation,
+            double expoRotation,
+            double maxVelMmPerS,
+            double maxAngVelRadPerS
+    ) {
+        this.deadband = deadband;
+        this.expoTranslation = expoTranslation;
+        this.expoRotation = expoRotation;
+        this.maxVelMmPerS = maxVelMmPerS;
+        this.maxAngVelRadPerS = maxAngVelRadPerS;
+    }
+
+    public double deadband() {
+        return deadband;
+    }
+
+    public double expoTranslation() {
+        return expoTranslation;
+    }
+
+    public double expoRotation() {
+        return expoRotation;
+    }
+
+    public double maxVelMmPerS() {
+        return maxVelMmPerS;
+    }
+
+    public double maxAngVelRadPerS() {
+        return maxAngVelRadPerS;
+    }
+}

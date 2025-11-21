@@ -23,12 +23,12 @@ public class Team28770Constants
     public static final String MOTOR_BR = "br";
 
     // Linear dimensions in millimeters
-    public static final double WHEEL_RADIUS_MM = 48.0; // TODO: measure actual
-    public static final double WHEEL_BASE_MM   = 330.0; // front-back distance, TODO: measure
-    public static final double TRACK_WIDTH_MM  = 330.0; // left-right distance, TODO: measure
+    public static final double WHEEL_RADIUS_MM = 50.0; // TODO: measure actual
+    public static final double WHEEL_BASE_MM   = 237.42; // front-back distance, TODO: measure
+    public static final double TRACK_WIDTH_MM  = 310.0; // left-right distance, TODO: measure
 
     // Encoder/motor config
-    public static final double TICKS_PER_REV = 537.6; // TODO: confirm motor
+    public static final double TICKS_PER_REV = 537.7; // TODO: confirm motor
     public static final double GEAR_RATIO    = 1.0;       // wheel rev / motor rev, TODO: confirm
 
     // Derived: millimeters per wheel revolution
@@ -52,6 +52,8 @@ public class Team28770Constants
     public static final double HEADING_KP = 4.0;    // TODO: tune
     public static final double HEADING_KI = 0.0;    // TODO: tune
     public static final double HEADING_KD = 0.4;    // TODO: tune
+    public static final double HEADING_KS = 0.15;    // TODO: tune
+    public static final double HEADING_ERR_DEADBAND_RAD = Math.toRadians(0.5); // TODO: tune
 
     // Autonomous motion limits
     public static final double AUTO_MAX_VEL_MM_PER_S = 1000.0;       // TODO: tune
