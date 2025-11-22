@@ -24,10 +24,9 @@ public final class TeleOpDriveHelper
         // --- 1. TRANSLATION (Magnitude-Based with Noise Floor) ---
 
         // A. Apply a tiny noise floor to raw components to prevent "bleed-through" drift.
-        //    This ensures that if you push straight forward, a 1% thumb slip doesn't cause a strafe.
-        final double NOISE_FLOOR = 0.02; // 2% stick deadzone for individual axes
-        if (Math.abs(lx) < NOISE_FLOOR) lx = 0.0;
-        if (Math.abs(ly) < NOISE_FLOOR) ly = 0.0;
+        //    This ensures that if you push straight forward, a  < 5% thumb slip doesn't cause a strafe.
+        if (Math.abs(lx) < cfg.deadband()) lx = 0.0;
+        if (Math.abs(ly) < cfg.deadband()) ly = 0.0;
 
         // B. Calculate the magnitude (length) of the joystick vector
         double rawMagnitude = Math.hypot(lx, ly);

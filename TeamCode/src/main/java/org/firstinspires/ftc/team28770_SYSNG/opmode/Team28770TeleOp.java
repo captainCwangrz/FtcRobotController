@@ -58,7 +58,7 @@ public class Team28770TeleOp extends OpMode
         // 1. Read Joystick Inputs (Robot-Centric)
         //    Note: Gamepad Y is negative up, so we invert it.
         double lx = -gamepad1.left_stick_x;
-        double ly = -gamepad1.left_stick_y; // Forward is negative on stick, positive in math
+        double ly = gamepad1.left_stick_y;
         double rx = -gamepad1.right_stick_x;
 
         // 2. Shape Inputs
