@@ -36,7 +36,7 @@ public class Team28770Constants
 
     // Max wheel speed estimates (for normalization / motion constraints)
     // You can refine these later with tests.
-    public static final double MAX_WHEEL_SPEED_MM_PER_S = 1633.6; // TODO: tune
+    public static final double MAX_WHEEL_SPEED_MM_PER_S = 1633.6;
     public static final double MAX_WHEEL_RPS = MAX_WHEEL_SPEED_MM_PER_S / WHEEL_CIRCUMFERENCE_MM;
 
     // TeleOp input shaping configuration (stick space -> mm/s, rad/s)
