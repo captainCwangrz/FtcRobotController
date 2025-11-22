@@ -23,13 +23,13 @@ public class Team28770Constants
     public static final String MOTOR_BR = "br";
 
     // Linear dimensions in millimeters
-    public static final double WHEEL_RADIUS_MM = 50.0; // TODO: measure actual
-    public static final double WHEEL_BASE_MM   = 237.42; // front-back distance, TODO: measure
-    public static final double TRACK_WIDTH_MM  = 310.0; // left-right distance, TODO: measure
+    public static final double WHEEL_RADIUS_MM = 50.0;
+    public static final double WHEEL_BASE_MM   = 237.42; // front-back distance
+    public static final double TRACK_WIDTH_MM  = 310.0; // left-right distance
 
     // Encoder/motor config
-    public static final double TICKS_PER_REV = 537.7; // TODO: confirm motor
-    public static final double GEAR_RATIO    = 1.0;       // wheel rev / motor rev, TODO: confirm
+    public static final double TICKS_PER_REV = 537.7;
+    public static final double GEAR_RATIO    = 1.0;       // wheel rev / motor rev
 
     // Derived: millimeters per wheel revolution
     public static final double WHEEL_CIRCUMFERENCE_MM = 2.0 * Math.PI * WHEEL_RADIUS_MM;
@@ -45,8 +45,6 @@ public class Team28770Constants
     public static final double TELEOP_EXPO_ROTATION = 0.3;           // TODO: tune
     public static final double TELEOP_MAX_VEL_MM_PER_S = 1200.0;     // TODO: tune
     public static final double TELEOP_MAX_ANG_VEL_RAD_PER_S = 4.0;   // TODO: tune
-    public static final double TELEOP_LINEAR_SLEW_RATE = 3000.0;     // mm/s^2, TODO: tune (symmetric legacy)
-    public static final double TELEOP_ANGULAR_SLEW_RATE = 8.0;       // rad/s^2, TODO: tune (symmetric legacy)
     public static final double TELEOP_LINEAR_ACCEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (increasing command)
     public static final double TELEOP_LINEAR_DECEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (decreasing command)
     public static final double TELEOP_ANG_ACCEL_SLEW = 8.0;          // rad/s^2, TODO: tune (increasing command)
@@ -69,11 +67,10 @@ public class Team28770Constants
     public static final String PINPOINT_NAME = "pinpoint";
     public static final GoBildaPinpointDriver.GoBildaOdometryPods PINPOINT_POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     public static final double PINPOINT_X_OFFSET = 0.0; // mm
-    public static final double PINPOINT_Y_OFFSET = 0.0; // mm
+    public static final double PINPOINT_Y_OFFSET = -40.0; // mm
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_X_DIR =
             GoBildaPinpointDriver.EncoderDirection.FORWARD;
     public static final GoBildaPinpointDriver.EncoderDirection PINPOINT_Y_DIR =
             GoBildaPinpointDriver.EncoderDirection.FORWARD;
-
     public static final DistanceUnit PINPOINT_DIST_UNIT = DistanceUnit.MM;
 }

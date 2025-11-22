@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.team28770_SYSNG.Team28770Constants;
 
 
 import java.util.Locale;
@@ -76,7 +77,7 @@ public class PinpointVerifier extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
 
-        odo = hardwareMap.get(GoBildaPinpointDriver.class,"pinpoint");
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, Team28770Constants.PINPOINT_NAME);
 
         /*
         Set the odometry pod positions relative to the point that the odometry computer tracks around.
@@ -86,7 +87,7 @@ public class PinpointVerifier extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(-69.0, -130.0, DistanceUnit.MM); //these are tuned for 3110-0002-0001 Product Insight #1
+        odo.setOffsets(Team28770Constants.PINPOINT_X_OFFSET, Team28770Constants.PINPOINT_Y_OFFSET, Team28770Constants.PINPOINT_DIST_UNIT); //these are tuned for 3110-0002-0001 Product Insight #1
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
@@ -94,7 +95,7 @@ public class PinpointVerifier extends LinearOpMode {
         If you're using another kind of odometry pod, uncomment setEncoderResolution and input the
         number of ticks per unit of your odometry pod.
          */
-        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        odo.setEncoderResolution(Team28770Constants.PINPOINT_POD_TYPE);
         //odo.setEncoderResolution(13.26291192, DistanceUnit.MM);
 
 
@@ -104,7 +105,7 @@ public class PinpointVerifier extends LinearOpMode {
         increase when you move the robot forward. And the Y (strafe) pod should increase when
         you move the robot to the left.
          */
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        odo.setEncoderDirections(Team28770Constants.PINPOINT_X_DIR, Team28770Constants.PINPOINT_Y_DIR);
 
 
         /*
