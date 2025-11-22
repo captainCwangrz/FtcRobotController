@@ -11,16 +11,7 @@ public final class TeleOpDriveHelper
     private TeleOpDriveHelper() {}
 
     /**
-     * Applies deadband, exponential scaling, and velocity limits to raw joystick inputs.
-     *
-     * <p><b>Coordinate Frame Note:</b></p>
-     * <ul>
-     * <li>{@code vx, vy}: Returned in the <b>Input Frame</b> (Joystick Up/Left).
-     * If used for Field-Centric drive, these represent Field North (+x) / West (+y).
-     * If used for Robot-Centric drive, these represent Robot Forward (+x) / Left (+y).</li>
-     * <li>{@code omega}: Always returned in the <b>Robot Frame</b> (CCW rotation rate).
-     * This value is invariant under frame rotation.</li>
-     * </ul>
+     * Applies magnitude-based shaping to translation inputs and component-based shaping to rotation.
      *
      * @param lx  left stick x, unitless strafe command (+ left).
      * @param ly  left stick y, unitless forward command (+ up on stick).
@@ -30,14 +21,46 @@ public final class TeleOpDriveHelper
      */
     public static ChassisSpeeds shapeInputs(double lx, double ly, double rx, TeleOpConfig cfg)
     {
-        double vxInput = InputShaping.applyDeadband(-ly, cfg.deadband());
-        vxInput = InputShaping.applyExpo(vxInput, cfg.expoTranslation());
-        double vx = InputShaping.scale(vxInput, cfg.maxVelMmPerS());
+        // --- 1. TRANSLATION (Magnitude-Based with Noise Floor) ---
 
-        double vyInput = InputShaping.applyDeadband(lx, cfg.deadband());
-        vyInput = InputShaping.applyExpo(vyInput, cfg.expoTranslation());
-        double vy = InputShaping.scale(vyInput, cfg.maxVelMmPerS());
+        // A. Apply a tiny noise floor to raw components to prevent "bleed-through" drift.
+        //    This ensures that if you push straight forward, a 1% thumb slip doesn't cause a strafe.
+        final double NOISE_FLOOR = 0.02; // 2% stick deadzone for individual axes
+        if (Math.abs(lx) < NOISE_FLOOR) lx = 0.0;
+        if (Math.abs(ly) < NOISE_FLOOR) ly = 0.0;
 
+        // B. Calculate the magnitude (length) of the joystick vector
+        double rawMagnitude = Math.hypot(lx, ly);
+
+        // C. Apply the main Deadband & Expo to the MAGNITUDE, not the axes.
+        //    This ensures circular response (diagonal speed == forward speed).
+        double shapedMagnitude = InputShaping.applyDeadband(rawMagnitude, cfg.deadband());
+        shapedMagnitude = InputShaping.applyExpo(shapedMagnitude, cfg.expoTranslation());
+
+        // D. Re-scale the original vector direction by the new shaped magnitude.
+        double vx, vy;
+        if (rawMagnitude > 1e-6)
+        {
+            double scaleFactor = shapedMagnitude / rawMagnitude;
+            // Convert Joystick Frame (Up-Negative) to Robot Frame (Forward-Positive)
+            vx = -ly * scaleFactor;
+            vy = lx * scaleFactor;
+        }
+        else
+        {
+            vx = 0.0;
+            vy = 0.0;
+        }
+
+        // E. Scale to physical limits (mm/s)
+        //    Note: scale() clamps the output, but our math above guarantees [-1, 1] anyway.
+        vx = InputShaping.scale(vx, cfg.maxVelMmPerS());
+        vy = InputShaping.scale(vy, cfg.maxVelMmPerS());
+
+
+        // --- 2. ROTATION (Component-Based) ---
+
+        // Rotation is 1D, so we shape it directly. Magnitude logic doesn't apply here.
         double omegaInput = InputShaping.applyDeadband(rx, cfg.deadband());
         omegaInput = InputShaping.applyExpo(omegaInput, cfg.expoRotation());
         double omega = InputShaping.scale(omegaInput, cfg.maxAngVelRadPerS());

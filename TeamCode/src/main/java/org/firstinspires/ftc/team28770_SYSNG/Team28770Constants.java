@@ -36,15 +36,15 @@ public class Team28770Constants
 
     // Max wheel speed estimates (for normalization / motion constraints)
     // You can refine these later with tests.
-    public static final double MAX_WHEEL_SPEED_MM_PER_S = 1500.0; // TODO: tune
+    public static final double MAX_WHEEL_SPEED_MM_PER_S = 1633.6; // TODO: tune
     public static final double MAX_WHEEL_RPS = MAX_WHEEL_SPEED_MM_PER_S / WHEEL_CIRCUMFERENCE_MM;
 
     // TeleOp input shaping configuration (stick space -> mm/s, rad/s)
     public static final double TELEOP_DEADBAND = 0.05;               // TODO: tune
     public static final double TELEOP_EXPO_TRANSLATION = 0.25;       // TODO: tune
     public static final double TELEOP_EXPO_ROTATION = 0.3;           // TODO: tune
-    public static final double TELEOP_MAX_VEL_MM_PER_S = 1200.0;     // TODO: tune
-    public static final double TELEOP_MAX_ANG_VEL_RAD_PER_S = 4.0;   // TODO: tune
+    public static final double TELEOP_MAX_VEL_MM_PER_S = 1300.0;     // TODO: tune
+    public static final double TELEOP_MAX_ANG_VEL_RAD_PER_S = 4.5;   // TODO: tune
     public static final double TELEOP_LINEAR_ACCEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (increasing command)
     public static final double TELEOP_LINEAR_DECEL_SLEW = 3000.0;    // mm/s^2, TODO: tune (decreasing command)
     public static final double TELEOP_ANG_ACCEL_SLEW = 8.0;          // rad/s^2, TODO: tune (increasing command)
